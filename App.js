@@ -1,22 +1,31 @@
 import 'react-native-gesture-handler';
-import { Image, TouchableOpacity } from 'react-native';
 import * as React from 'react';
-
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import { createStore, combineReducers } from 'redux';
+import { Provider } from 'react-redux';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import MealDetailScreen from './screens/MealDetailScreen';
 import CategoriesScreen from './screens/CategoriesScreen';
 import FavoritesScreen from './screens/FavoritesScreen';
 import FiltersScreen from './screens/FiltersScreen';
 import CategoryMealScreen from './screens/CategoryMealsScreen';
+import mealsReducer from './store/reducers/meals';
 
 import { Ionicons } from '@expo/vector-icons';
+import {HeaderButtons, Item} from 'react-navigation-header-buttons';
+import HeaderButton from './components/HeaderButton';
+import {Header} from '@react-navigation/elements'
 
 
+const rootReducer = combineReducers({
+  meals:mealsReducer
+});
 
+const store=createStore(rootReducer);
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
 const Draw = createDrawerNavigator();
@@ -34,30 +43,38 @@ function TabBar () {
 function  HomeStack ({navigation}) {
   return (
   <Stack.Navigator screenOptions={CategoriesScreen.options}>
-    <Stack.Screen name='Categories' component={CategoriesScreen} options={CategoriesScreen.options,{
-      headerRight: ()=>
-    <TouchableOpacity onPress={() => {navigation.toggleDrawer();} }>
-      <Image style={{width:30,height:30}} resizeMode='contain' source={require('./assets/menu.png')} />
-      </TouchableOpacity> }} />
+    <Stack.Screen name='Categories' component={CategoriesScreen} options={CategoriesScreen.options, {headerRight: ()=>
+      <HeaderButtons HeaderButtonComponent={HeaderButton}>
+      <Item iconName="menu-outline" iconSize={23} onPress={()=>{navigation.toggleDrawer();}} />
+    </HeaderButtons>}} />
     <Stack.Screen name="CategoryScreen" component={CategoryMealScreen} />
     <Stack.Screen name="MealDetail" component={MealDetailScreen} />
   </Stack.Navigator>
   )
 }
 
-function  FavoritesStack () {
+function  FavoritesStack ({navigation}) {
   return (
   <Stack.Navigator>
-    <Stack.Screen name='Favorites' component={FavoritesScreen} options={CategoriesScreen.options} />
+    <Stack.Screen name='Favorites' component={FavoritesScreen} options={{title:'Favorite', headerStyle:{backgroundColor:'#1b93de'},headerRight: ()=>
+      <HeaderButtons HeaderButtonComponent={HeaderButton}>
+      <Item iconName="menu-outline" iconSize={23} onPress={()=>{navigation.toggleDrawer();}} />
+    </HeaderButtons>}} />
     <Stack.Screen name="MealsFav" component={MealDetailScreen} />
   </Stack.Navigator>
   )
 }
 
-function FiltersStack () {
+function FiltersStack ({navigation}) {
   return (
   <Stack.Navigator>
-  <Stack.Screen name='FiltersStack' component={FiltersScreen} options={{headerTitle:'Filters'}} />
+  <Stack.Screen name='FiltersStack' component={FiltersScreen} options={{headerTitle:'Filters', headerStyle: {backgroundColor:'#1b93de'}, 
+  headerRight:() =>
+    <HeaderButtons  HeaderButtonComponent={HeaderButton}>
+      <Item  iconName="save-outline"  onPress={()=>{}} />
+    </HeaderButtons>
+  
+  }} />
  </Stack.Navigator>
   )
 }
@@ -65,22 +82,26 @@ function FiltersStack () {
 export default function App() {
 
   return (
-<NavigationContainer>
-    <Draw.Navigator initialRouteName="HomeDraw" screenOptions={{headerShown:false}}>
-    <Draw.Screen name='Home' component={TabBar} />
-    <Draw.Screen name='Filters' component={FiltersStack} />
-    </Draw.Navigator>
-</NavigationContainer>
+<Provider store={store}>  
+<SafeAreaProvider>
+  <NavigationContainer>
+      <Draw.Navigator initialRouteName="HomeDraw" screenOptions={{headerShown:false}}>
+        <Draw.Screen name='Home' component={TabBar} />
+        <Draw.Screen name='Filters' component={FiltersStack} />
+      </Draw.Navigator>
+  </NavigationContainer>
+  </SafeAreaProvider>  
+</Provider>
   );
 
 }
 
-
-CategoriesScreen.options={
-  headerStyle: {backgroundColor:'#1b93de'},
-  headerTitleStyle: {fontWeight:'bold', alignSelf:'center'},
+  CategoriesScreen.options={
+    headerTitle:'Categories',
+    headerStyle:{backgroundColor:'#1b93de'}
+  },
   
-}
+
 
 FavoritesStack.options={
   tabBarIcon: () => {
@@ -98,87 +119,13 @@ HomeStack.options={
   tabBarColor:'#1b93de'
 }
 
-/*{title:'Categories',headerRight: ()=>(<Button title='me' onPress={()=>{navigation.toggleDrawer();}} />) }*/
-
-/*const Drawer= createDrawerNavigator();
-const Stack = createStackNavigator();
-const Tab = createMaterialBottomTabNavigator();
-
-
-const FiltersStack= () => (
-  <Stack.Navigator>
-    <Stack.Screen name='Filters' component={FiltersScreen} />
-  </Stack.Navigator>
-)
-
-const TabNav= () => (
-  <Tab.Navigator shifting={true} screenOptions={{tabBarColor: '#3647e0'}}>
-    <Tab.Screen name="Main" component={HomeStackScreen} options={HomeStackScreen.options} />
-    <Tab.Screen name='Favorites'  component={FavoritesStack} options={FavoritesScreen.options}/>
-  </Tab.Navigator>
-)
-
-const FavoritesStack = () => (
-  <Stack.Navigator>
-    <Stack.Screen name='FavoritesScreen' component={FavoritesScreen} options={FavoritesScreen.options} />
-    <Stack.Screen name="MealsNav"  component={MealDetailScreen} options = {MealDetailScreen.options}/>
-  </Stack.Navigator>
-);
-
-const HomeStackScreen = () => (
-  <Stack.Navigator>
-  <Stack.Screen name='Categories' component={CategoriesScreen} options={CategoriesScreen.options} />
-  <Stack.Screen name="Details" component={CategoryMealsScreen} options = {CategoryMealsScreen.options}/>
-  <Stack.Screen name='Meals' component={MealDetailScreen} options = {MealDetailScreen.options}/>
-  </Stack.Navigator>
-);
-
-function App() {
-  return (
-    <NavigationContainer>
-      <Drawer.Navigator screenOptions={{headerShown:false}} > 
-      <Drawer.Screen  name='Home'  component={TabNav} />
-      <Drawer.Screen name='Filters'  component={FiltersStack}/>
-      </Drawer.Navigator>
-    </NavigationContainer>
-  );
-}*/
-
-
-
-/* function TabBar () {
-  return (
-  <Tab.Navigator screenOptions={{headerShow:false}}>
-    <Tab.Screen name='HomeTabs' component={HomeStack} />
-    <Tab.Screen name='FavoriteTabs' component={FavoritesStack} />
-  </Tab.Navigator>
-  )
-}
-
-function  HomeStack ({navigation}) {
-  return (
-  <Stack.Navigator>
-    <Stack.Screen name='Home' component={CategoriesScreen} options={{title:'Categories',headerRight: ()=>(<Button title='me' onPress={()=>{navigation.toggleDrawer();}} />) }} />
-  </Stack.Navigator>
-  )
-}
-function  FavoritesStack () {
-  return (
-  <Stack.Navigator>
-  <Stack.Screen name='Favorites' component={FavoritesScreen} />
- </Stack.Navigator>
-  )
-}
-
-export default function App() {
-
-  return (
-<NavigationContainer>
-    <Draw.Navigator screenOptions={{headerShown:false}}>
-    <Draw.Screen name='HomeDraw' component={TabBar} />
-    <Draw.Screen name='Filters' component={FiltersScreen} />
-    </Draw.Navigator>
-</NavigationContainer>
-  );
-
-} */
+/*<TouchableOpacity onPress={() => {navigation.toggleDrawer();} }>
+      <Image style={{width:30,height:30}} resizeMode='contain' source={require('./assets/menu.png')} />
+      </TouchableOpacity> }}
+      
+      {
+      headerRight: ()=>
+      <HeaderButtons HeaderButtonComponent={HeaderButton}>
+      <Item iconName="menu-outline" iconSize={23} onPress={()=>{navigation.toggleDrawer();}} />
+    </HeaderButtons> }
+      */
