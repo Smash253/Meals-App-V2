@@ -18,12 +18,12 @@ import mealsReducer from './store/reducers/meals';
 import { Ionicons } from '@expo/vector-icons';
 import {HeaderButtons, Item} from 'react-navigation-header-buttons';
 import HeaderButton from './components/HeaderButton';
-import {Header} from '@react-navigation/elements'
 
 
 const rootReducer = combineReducers({
   meals:mealsReducer
 });
+
 
 const store=createStore(rootReducer);
 const Stack = createNativeStackNavigator();
@@ -43,7 +43,7 @@ function TabBar () {
 function  HomeStack ({navigation}) {
   return (
   <Stack.Navigator screenOptions={CategoriesScreen.options}>
-    <Stack.Screen name='Categories' component={CategoriesScreen} options={CategoriesScreen.options, {headerRight: ()=>
+    <Stack.Screen name='Categories' component={CategoriesScreen} options={CategoriesScreen.options, {headerLeft: ()=>
       <HeaderButtons HeaderButtonComponent={HeaderButton}>
       <Item iconName="menu-outline" iconSize={23} onPress={()=>{navigation.toggleDrawer();}} />
     </HeaderButtons>}} />
@@ -55,26 +55,28 @@ function  HomeStack ({navigation}) {
 
 function  FavoritesStack ({navigation}) {
   return (
-  <Stack.Navigator>
-    <Stack.Screen name='Favorites' component={FavoritesScreen} options={{title:'Favorite', headerStyle:{backgroundColor:'#1b93de'},headerRight: ()=>
+  <Stack.Navigator screenOptions={{headerTitle:'Favorites', 
+  headerStyle: {backgroundColor:'#1b93de'}}}>
+    <Stack.Screen name='Favorites' component={FavoritesScreen} options={{headerLeft: ()=>
       <HeaderButtons HeaderButtonComponent={HeaderButton}>
-      <Item iconName="menu-outline" iconSize={23} onPress={()=>{navigation.toggleDrawer();}} />
-    </HeaderButtons>}} />
-    <Stack.Screen name="MealsFav" component={MealDetailScreen} />
+      <Item iconName="menu-outline" iconSize={23} onPress={()=>{navigation.toggleDrawer();}}/>
+    </HeaderButtons>
+    
+    }} />
   </Stack.Navigator>
   )
 }
 
 function FiltersStack ({navigation}) {
   return (
-  <Stack.Navigator>
-  <Stack.Screen name='FiltersStack' component={FiltersScreen} options={{headerTitle:'Filters', headerStyle: {backgroundColor:'#1b93de'}, 
-  headerRight:() =>
-    <HeaderButtons  HeaderButtonComponent={HeaderButton}>
-      <Item  iconName="save-outline"  onPress={()=>{}} />
-    </HeaderButtons>
-  
-  }} />
+  <Stack.Navigator screenOptions={FiltersStack.options}>
+  <Stack.Screen name='FiltersStack' component={FiltersScreen} options={{headerLeft: ()=>
+    <HeaderButtons HeaderButtonComponent={HeaderButton}>
+    <Item iconName="menu-outline" iconSize={23} onPress={()=>{navigation.openDrawer();}} />
+  </HeaderButtons>,headerRight: ()=>
+      <HeaderButtons HeaderButtonComponent={HeaderButton}>
+      <Item iconName="save-outline" iconSize={23} onPress={()=>{navigation.navigate("Home")}} />
+    </HeaderButtons>}} />
  </Stack.Navigator>
   )
 }
@@ -85,9 +87,9 @@ export default function App() {
 <Provider store={store}>  
 <SafeAreaProvider>
   <NavigationContainer>
-      <Draw.Navigator initialRouteName="HomeDraw" screenOptions={{headerShown:false}}>
+      <Draw.Navigator initialRouteName="Home" screenOptions={{headerShown:false}}>
         <Draw.Screen name='Home' component={TabBar} />
-        <Draw.Screen name='Filters' component={FiltersStack} />
+        <Draw.Screen name='Filters' component={FiltersStack}/>
       </Draw.Navigator>
   </NavigationContainer>
   </SafeAreaProvider>  
@@ -96,10 +98,20 @@ export default function App() {
 
 }
 
-  CategoriesScreen.options={
+FiltersStack.options={
+  headerTitle:'Filters',
+  headerStyle: {backgroundColor:'#1b93de'}
+},
+
+FavoritesStack.options={
+  headerTitle:'Favorites', 
+  headerStyle: {backgroundColor:'#1b93de'}
+},
+
+CategoriesScreen.options={
     headerTitle:'Categories',
     headerStyle:{backgroundColor:'#1b93de'}
-  },
+  };
   
 
 
@@ -118,14 +130,3 @@ HomeStack.options={
   },
   tabBarColor:'#1b93de'
 }
-
-/*<TouchableOpacity onPress={() => {navigation.toggleDrawer();} }>
-      <Image style={{width:30,height:30}} resizeMode='contain' source={require('./assets/menu.png')} />
-      </TouchableOpacity> }}
-      
-      {
-      headerRight: ()=>
-      <HeaderButtons HeaderButtonComponent={HeaderButton}>
-      <Item iconName="menu-outline" iconSize={23} onPress={()=>{navigation.toggleDrawer();}} />
-    </HeaderButtons> }
-      */
